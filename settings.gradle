@@ -1,0 +1,3 @@
+include ':panellist'
+include ':app'
+rootProject.name = "PanelListView"
