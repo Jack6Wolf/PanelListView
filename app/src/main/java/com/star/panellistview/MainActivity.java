@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             if (i == 9 && !flag) {
                 data.add("第" + i + "行第四个dsadaddddddadaddddddddddddddddd");
                 flag = true;
-            }else {
+            } else {
                 data.add("第" + i + "行第四个");
             }
             data.add("第" + i + "行第五个");
@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.setTitle("表");
         adapter.setStart("行\\列");
         adapter.setColumnWidth(100);
+        adapter.setShowColumn(true);
         adapter.setStartBackgroundResource(R.color.colorPrimary);
         adapter.setColumnDataList(columnDataList);
         adapter.setItemWidthList(itemWidthList);

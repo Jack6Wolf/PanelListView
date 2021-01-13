@@ -3,9 +3,11 @@ package com.star.panellist;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +65,8 @@ public abstract class TableListAdapter {
     private String start = "";
     private int titleBackgroundResource;
     private int startBackgroundResource;
+    private int titleTextSize;
+    private int rowColumnTextSize;
     private List<String> rowDataList;
     private List<String> columnDataList;
     //标题和横向表头字体的颜色
@@ -132,6 +136,20 @@ public abstract class TableListAdapter {
     }
 
     /**
+     * 设置标题字体大小
+     */
+    public void setTitleTextSize(int titleTextSize) {
+        this.titleTextSize = titleTextSize;
+    }
+
+    /**
+     * 设置表头字体大小
+     */
+    public void setRowColumnTextSize(int rowColumnTextSize) {
+        this.rowColumnTextSize = rowColumnTextSize;
+    }
+
+    /**
      * 设置表头背景
      */
     public void setStartBackgroundResource(int resourceId) {
@@ -171,6 +189,13 @@ public abstract class TableListAdapter {
      */
     public void setRowColor(String rowColor) {
         this.rowColor = rowColor;
+    }
+
+    /**
+     * 设置竖向表头的背景色
+     */
+    public void setColumnColor(String columnColor) {
+        this.columnColor = columnColor;
     }
 
     /**
@@ -239,10 +264,12 @@ public abstract class TableListAdapter {
         if (titleBackgroundResource != 0) {
             tvTitle.setBackgroundResource(titleBackgroundResource);
         }
+        if (titleTextSize != 0)
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleTextSize);
         tvTitle.getPaint().setFakeBoldText(true);
         tvTitle.setGravity(Gravity.CENTER);
         tvTitle.setTextColor(Color.parseColor(titleColor));
-        tvTitle.setId(View.generateViewId());//设置一个随机id，这样可以保证不冲突
+        tvTitle.setId(IdiUtils.generateViewId());//设置一个随机id，这样可以保证不冲突
         RelativeLayout.LayoutParams lpTvTitle = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, titleHeight);
         plRoot.addView(tvTitle, lpTvTitle);
 
@@ -252,9 +279,11 @@ public abstract class TableListAdapter {
             startTv.setTextColor(Color.parseColor(titleColor));
             if (startBackgroundResource != 0)
                 startTv.setBackgroundResource(startBackgroundResource);
+            if (rowColumnTextSize != 0)
+                startTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, rowColumnTextSize);
             startTv.getPaint().setFakeBoldText(true);
             startTv.setGravity(Gravity.CENTER);
-            startTv.setId(View.generateViewId());//设置一个随机id，这样可以保证不冲突
+            startTv.setId(IdiUtils.generateViewId());//设置一个随机id，这样可以保证不冲突
             RelativeLayout.LayoutParams lpTvStart = new RelativeLayout.LayoutParams(columnWidth, titleHeight);
             lpTvStart.addRule(RelativeLayout.BELOW, tvTitle.getId());
             plRoot.addView(startTv, lpTvStart);
@@ -268,7 +297,7 @@ public abstract class TableListAdapter {
         mhsvRow.setHorizontalScrollBarEnabled(false);
         mhsvRow.setOverScrollMode(View.OVER_SCROLL_NEVER);//去除滑动到边缘时出现的阴影
         mhsvRow.addView(llRow);//暂时先不给ll_row添加子view，等布局画出来了再添加
-        mhsvRow.setId(View.generateViewId());
+        mhsvRow.setId(IdiUtils.generateViewId());
         RelativeLayout.LayoutParams lpMhsvRow = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, titleHeight);
         //在title的下面
         lpMhsvRow.addRule(RelativeLayout.BELOW, tvTitle.getId());
@@ -281,7 +310,7 @@ public abstract class TableListAdapter {
             lvColumn = new ListView(context);
             lvColumn.setBackgroundColor(Color.parseColor(columnColor));
             lvColumn.setSelector(R.drawable.selector_bg);
-            lvColumn.setId(View.generateViewId());
+            lvColumn.setId(IdiUtils.generateViewId());
             lvColumn.setVerticalScrollBarEnabled(false);//去掉滚动条
             RelativeLayout.LayoutParams lpLvColumn = new RelativeLayout.LayoutParams(columnWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             lpLvColumn.addRule(RelativeLayout.BELOW, startTv.getId());
@@ -372,11 +401,14 @@ public abstract class TableListAdapter {
         //分隔线的设置，如果content的item设置了分割线，那row使用相同的分割线，除非单独给row设置了分割线
         if (rowDivider == null) {
             if (llContentItem != null) {
-                llRow.setDividerDrawable(llContentItem.getDividerDrawable());
-                llRow.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    llRow.setDividerDrawable(llContentItem.getDividerDrawable());
+                    llRow.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+                }
             }
         } else {
             llRow.setDividerDrawable(rowDivider);
+            llRow.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
         }
         //横向表头每一个item的宽度都取决于content的item的宽度
         for (int i = 0; i < rowCount; i++) {
@@ -388,6 +420,8 @@ public abstract class TableListAdapter {
             rowItem.setGravity(Gravity.CENTER);
             rowItem.setTextColor(Color.parseColor(titleColor));
             rowItem.setBackgroundColor(Color.parseColor(rowColor));
+            if (rowColumnTextSize != 0)
+                rowItem.setTextSize(TypedValue.COMPLEX_UNIT_SP, rowColumnTextSize);
             llRow.addView(rowItem);
         }
     }
@@ -530,6 +564,8 @@ public abstract class TableListAdapter {
             if (convertView == null) {
                 view = new TextView(context);
                 ((TextView) view).setGravity(Gravity.CENTER);
+                if (rowColumnTextSize != 0)
+                    ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_SP, rowColumnTextSize);
                 if (llContentItem != null)
                     ((TextView) view).setHeight(llContentItem.getHeight());
             } else {
